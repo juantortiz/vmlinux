@@ -16,18 +16,25 @@ mkdir dump
 xfsdump -0uf /root/dump/root.dump /dev/cl/root
 xfsrestore -f /root/dump/root.dump /root/temporal
 
-vi (/etc/fstab) and -> (root/temporal/etc/fstab)
+#vi (/etc/fstab) and -> (root/temporal/etc/fstab)
+cp /etc/fstab /etc/fstab.bck
+$UUID_SDB1=lsblk -f | grep sdb1 | awk '{print $3}'
 
-/dev/new/nroot     /                       xfs     defaults        0 0
-UUID=c14be769-fc1d-4058-838b-b310876d5eac /boot                   ext4    defaults        1 1
-/dev/new/nswap     swap                    swap    defaults        0 0
+echo "/dev/new/nroot     /                       xfs     defaults        0 0" > /etc/fstab
+echo "UUID=5c42a381-8901-4558-8cf8-c2716ea67241 /boot                   ext4    defaults        1 1" >> /etc/fstab
+echo "/dev/new/nswap     swap                    swap    defaults        0 0" >> /etc/fstab
+
+cp /etc/fstab /root/temporal/etc/fstab
+#/dev/new/nroot     /                       xfs     defaults        0 0
+#UUID=c14be769-fc1d-4058-838b-b310876d5eac /boot                   ext4    defaults        1 1
+#/dev/new/nswap     swap                    swap    defaults        0 0
 
 vi /etc/default/grub
-GRUB_CMDLINE_LINUX="crashkernel=auto resume=/dev/mapper/cl-swap rd.lvm.lv=cl/root rd.lvm.lv=cl/swap rhgb quiet"
+GRUB_CMDLINE_LINUX="crashkernel=auto resume=/dev/new/nswap rd.lvm.lv=new/nroot rd.lvm.lv=new/nswap rhgb quiet"
 
 umount /root/temporal
 mount /dev/new/nroot /
 mount -o rw,remount /
-grub2-mkconfig
+grub2-mkconfig | grep nroot
 
 reboot
