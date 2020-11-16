@@ -29,3 +29,5 @@ umount /root/temporal
 mount /dev/new/nroot /
 mount -o rw,remount /
 grub2-mkconfig
+
+reboot
